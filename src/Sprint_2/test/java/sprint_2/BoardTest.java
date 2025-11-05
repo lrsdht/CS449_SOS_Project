@@ -35,8 +35,6 @@ public class BoardTest {
     // CHATGPT
     @Test
     public void testInvalidRow() {
-        // getCell with invalid row should throw exception or return null
-        // Based on your code, it will throw ArrayIndexOutOfBoundsException
         assertThrows(ArrayIndexOutOfBoundsException.class, () -> {
             board.getCell(3, 0);
         }, "Accessing invalid row should throw exception");
