@@ -18,6 +18,10 @@ public class ComputerPlayer extends Player {
     }
 
     public static Difficulty parseDifficulty(String difficultyString) {
+        if (difficultyString == null || difficultyString.isEmpty()) {
+            return Difficulty.MEDIUM; // Default
+        }
+
         return switch (difficultyString.toLowerCase()) {
             case "easy" -> Difficulty.EASY;
             case "hard" -> Difficulty.HARD;
@@ -32,6 +36,28 @@ public class ComputerPlayer extends Player {
 
     public AIMove AIChooseMoveFromState(GameState state) {
         int depth = getDepth(state.getBoard().getSize());
+
+        Board b = state.getBoard();
+        int N = b.getSize();
+
+// 1) If any O placement immediately makes SOS, take it (win or score, and also blocks S?S)
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                if (b.getCell(r, c) == Move.EMPTY && b.countSOSFromPlacement(r, c, Move.O) > 0) {
+                    return new AIMove(r, c, Move.O);
+                }
+            }
+        }
+
+// 2) If any S placement immediately makes SOS (end-cap), also consider it
+        for (int r = 0; r < N; r++) {
+            for (int c = 0; c < N; c++) {
+                if (b.getCell(r, c) == Move.EMPTY && b.countSOSFromPlacement(r, c, Move.S) > 0) {
+                    return new AIMove(r, c, Move.S);
+                }
+            }
+        }
+
 
         GameNode rootNode = GameNode.fromGameState(state);
         boolean isMaximizingPlayer = (rootNode.currentTurn == this.getColor());

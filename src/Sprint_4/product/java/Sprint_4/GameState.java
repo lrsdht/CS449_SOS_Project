@@ -107,6 +107,15 @@ public class GameState {
         }
     }
 
+    // Add this method for testing purposes
+    void switchTurnForTest() {
+        if (current == bluePlayer) {
+            current = redPlayer;
+        } else {
+            current = bluePlayer;
+        }
+    }
+
     public boolean isGameOver() {
         return gameOver;
     }
