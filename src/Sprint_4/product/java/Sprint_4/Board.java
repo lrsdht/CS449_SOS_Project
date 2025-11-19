@@ -1,18 +1,18 @@
-package sprint_3;
+package Sprint_4;
 
 enum Move { EMPTY, S, O};
 
 public class Board {
 
     private final int size;
-    private final sprint_3.Move[][] grid;
+    private final Move[][] grid;
 
     public Board(int size) {
         this.size = size;
-        grid = new sprint_3.Move[size][size];
+        grid = new Move[size][size];
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                grid[i][j] = sprint_3.Move.EMPTY;
+                grid[i][j] = Move.EMPTY;
             }
         }
     } // constructor
@@ -20,7 +20,7 @@ public class Board {
     public int getSize() {
         return size;
     }
-    public sprint_3.Move getCell(int row, int column) {
+    public Move getCell(int row, int column) {
         return grid[row][column];
     }
     public boolean isMoveInBounds(int row, int column) {
@@ -28,9 +28,9 @@ public class Board {
     }
 
     // place move in grid
-    public boolean place(int row, int column, sprint_3.Move m) {
-        if ((!isMoveInBounds(row, column)) || m == sprint_3.Move.EMPTY) return false;
-        if (grid[row][column] != sprint_3.Move.EMPTY) return false;
+    public boolean place(int row, int column, Move m) {
+        if ((!isMoveInBounds(row, column)) || m == Move.EMPTY) return false;
+        if (grid[row][column] != Move.EMPTY) return false;
         grid[row][column] = m;
         return true;
     }
@@ -57,7 +57,7 @@ public class Board {
             int column2 = column + directionsColumn;
 
             if (isMoveInBounds(row1, column1) && isMoveInBounds(row2, column2)) {
-                if (getCell(row1, column1) == sprint_3.Move.S && getCell(row, column) == sprint_3.Move.O && getCell(row2, column2) == sprint_3.Move.S) {
+                if (getCell(row1, column1) == Move.S && getCell(row, column) == Move.O && getCell(row2, column2) == Move.S) {
                     count++;
                 }
             }
@@ -69,7 +69,7 @@ public class Board {
             int cEnd = column + 2 * directionsColumn;
 
             if (isMoveInBounds(rCenter, cCenter) && isMoveInBounds(rEnd, cEnd)) {
-                if (getCell(row, column) == sprint_3.Move.S && getCell(rCenter, cCenter) == sprint_3.Move.O && getCell(rEnd, cEnd) == sprint_3.Move.S) {
+                if (getCell(row, column) == Move.S && getCell(rCenter, cCenter) == Move.O && getCell(rEnd, cEnd) == Move.S) {
                     count++;
                 }
             }
@@ -80,7 +80,7 @@ public class Board {
             int cMiddle = column - directionsColumn;
 
             if (isMoveInBounds(rBeginning, cBeginning) && isMoveInBounds(rMiddle, cMiddle)) {
-                if (getCell(rBeginning, cBeginning) == sprint_3.Move.S && getCell(rMiddle, cMiddle) == sprint_3.Move.O && getCell(row, column) == sprint_3.Move.S) {
+                if (getCell(rBeginning, cBeginning) == Move.S && getCell(rMiddle, cMiddle) == Move.O && getCell(row, column) == Move.S) {
                     count++;
                 }
             }
@@ -91,11 +91,24 @@ public class Board {
     public boolean isGridFull(){
         for (int i = 0; i < size; i++) {
             for (int j = 0; j < size; j++) {
-                if (grid[i][j] == sprint_3.Move.EMPTY)
+                if (grid[i][j] == Move.EMPTY)
                     return false;
             }
         }
         return true;
+    }
+
+    // AI needs deep copy of board for minimax algo
+    public static Board AIBoardCopy(Board AIBoard) {
+        Board copyForAI = new Board(AIBoard.size);
+        for (int i= 0; i < AIBoard.size; i++) {
+            System.arraycopy(AIBoard.grid[i], 0, copyForAI.grid[i], 0, AIBoard.size);
+        }
+        return copyForAI;
+    }
+
+    void setCellForAIAlgorithm(int row, int column, Move m) {
+        grid[row][column] = m;
     }
 
 }

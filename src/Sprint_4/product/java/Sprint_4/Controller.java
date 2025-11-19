@@ -1,6 +1,5 @@
-package sprint_3;
+package Sprint_4;
 
-import sprint_3.GameState;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -11,13 +10,26 @@ import javafx.scene.layout.RowConstraints;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Line;
 
+import static Sprint_4.Player.createPlayer;
+
 public class Controller {
 
+    @FXML
+    private RadioButton blueHuman;
+    @FXML
+    private RadioButton blueComputer;
+    @FXML
+    private ComboBox<String> blueDifficulty;
+    @FXML
+    private RadioButton redHuman;
+    @FXML
+    private RadioButton redComputer;
+    @FXML
+    private ComboBox<String> redDifficulty;
     @FXML
     private ComboBox<String> boardSizeSelector;
     @FXML
     private GridPane boardGrid;
-
     @FXML
     private RadioButton redS;
     @FXML
@@ -29,6 +41,8 @@ public class Controller {
     @FXML
     private Button newGame;
     @FXML
+    private Button[][] cellButtons;
+    @FXML
     private RadioButton simpleMode;
     @FXML
     private RadioButton generalMode;
@@ -36,20 +50,31 @@ public class Controller {
     private Label statusLabel;
     @FXML
     private Pane overlay;
-
     @FXML
     private ToggleGroup redGroup;
     @FXML
     private ToggleGroup blueGroup;
     @FXML
     private ToggleGroup modeGroup;
-    private sprint_3.GameState gameState;
+    private GameState gameState;
 
 
     @FXML
     public void initialize() {
         boardSizeSelector.getItems().addAll("3", "6", "9");
         boardSizeSelector.setValue("3");
+
+        blueDifficulty.getItems().addAll("Easy", "Medium", "Hard");
+        blueDifficulty.setValue("Medium");
+        redDifficulty.getItems().addAll("Easy", "Medium", "Hard");
+        redDifficulty.setValue("Medium");
+
+        blueComputer.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            blueDifficulty.setVisible(newVal);
+        });
+        redComputer.selectedProperty().addListener((obs, oldVal, newVal) -> {
+            redDifficulty.setVisible(newVal);
+        });
 
         redS.setSelected(true);
         blueS.setSelected(true);
@@ -72,18 +97,18 @@ public class Controller {
     private void NewGameButtonCode(ActionEvent event) {
         int size = Integer.parseInt(boardSizeSelector.getValue());
 
-        sprint_3.GameState.Mode mode;
+        GameState.Mode mode;
         if (simpleMode.isSelected()) {
-            mode = sprint_3.GameState.Mode.SIMPLE;
+            mode = GameState.Mode.SIMPLE;
         } else {
-            mode = sprint_3.GameState.Mode.GENERAL;
+            mode = GameState.Mode.GENERAL;
         }
 
-        sprint_3.Player redPlayer = new sprint_3.HumanPlayer(sprint_3.Player.PlayerColor.RED, "Red");
-        sprint_3.Player bluePlayer = new sprint_3.HumanPlayer(sprint_3.Player.PlayerColor.BLUE, "Blue");
+        Player redPlayer = createPlayer(Player.PlayerColor.RED, "Red", redHuman.isSelected(), redDifficulty.getValue());
+        Player bluePlayer = createPlayer(Player.PlayerColor.BLUE, "Blue", blueHuman.isSelected(), blueDifficulty.getValue());
 
         if (gameState == null) {
-            gameState = new sprint_3.GameState();
+            gameState = new GameState();
         }
         gameState.startNewGame(size, mode, redPlayer, bluePlayer);
 
@@ -94,6 +119,8 @@ public class Controller {
 
     void buildBoard() {
         int boardSize = gameState.getBoard().getSize();
+
+        cellButtons = new Button[boardSize][boardSize];
 
         boardGrid.getChildren().clear();
         boardGrid.getColumnConstraints().clear();
@@ -130,9 +157,15 @@ public class Controller {
                 button.setStyle("-fx-font-size: " + (cellSize / 3) + "px; -fx-font-weight: bold;");
                 final int row = i, column = j;
                 button.setOnAction(event -> onButtonClick(row, column, button));
+
+                cellButtons[i][j] = button;
                 boardGrid.add(button, j, i);
             }
         }
+
+        updatePlayerControlsState();
+
+        javafx.application.Platform.runLater(this::triggerComputerTurnIfNeeded);
     }
 
     private void updateStatus() {
@@ -147,19 +180,19 @@ public class Controller {
             }
 
             int size = gameState.getBoard().getSize();
-            sprint_3.GameState.Mode mode = gameState.getMode();
-            sprint_3.Player currentPlayer = gameState.getCurrentPlayer();
-            sprint_3.Player.PlayerColor currentColor = currentPlayer.getColor();
+            GameState.Mode mode = gameState.getMode();
+            Player currentPlayer = gameState.getCurrentPlayer();
+            Player.PlayerColor currentColor = currentPlayer.getColor();
 
             String currentMove;
-            if (currentColor == sprint_3.Player.PlayerColor.RED) {
+            if (currentColor == Player.PlayerColor.RED) {
                 currentMove = redS.isSelected() ? "S" : "O";
             } else {
                 currentMove = blueS.isSelected() ? "S" : "O";
             }
 
             String modeStr = (mode == GameState.Mode.SIMPLE) ? "Simple" : "General";
-            String colorStr = (currentColor == sprint_3.Player.PlayerColor.RED) ? "Red" : "Blue";
+            String colorStr = (currentColor == Player.PlayerColor.RED) ? "Red" : "Blue";
 
             String message = String.format("Board: %dx%d | Mode: %s | Turn: %s | %s Move: %s | Red: %d | Blue: %d",
                 size, size, modeStr, colorStr, colorStr, currentMove,
@@ -179,14 +212,18 @@ public class Controller {
             return;
         }
 
-        sprint_3.Player currentPlayer = gameState.getCurrentPlayer();
+        Player currentPlayer = gameState.getCurrentPlayer();
+
+        if (currentPlayer instanceof ComputerPlayer) {
+            return;
+        }
 
         // choose which move based on current player's color
-        sprint_3.Move chosenMove;
-        if (currentPlayer.getColor() == sprint_3.Player.PlayerColor.RED) {
-            chosenMove = redS.isSelected() ? sprint_3.Move.S : sprint_3.Move.O;
+        Move chosenMove;
+        if (currentPlayer.getColor() == Player.PlayerColor.RED) {
+            chosenMove = redS.isSelected() ? Move.S : Move.O;
         } else {
-            chosenMove = blueS.isSelected() ? sprint_3.Move.S : sprint_3.Move.O;
+            chosenMove = blueS.isSelected() ? Move.S : Move.O;
         }
 
         if (!gameState.tryMove(row, column, chosenMove)) {
@@ -194,13 +231,15 @@ public class Controller {
             return;
         }
 
-        if (chosenMove == sprint_3.Move.S) {
+        if (chosenMove == Move.S) {
             cellBtn.setText("S");
         } else {
             cellBtn.setText("O");
         }
         drawSegmentsFor(row, column);
         updateStatus();
+
+        triggerComputerTurnIfNeeded();
     }
 
     private void drawSegmentsFor(int row, int column) {
@@ -211,19 +250,19 @@ public class Controller {
 
             int r1 = row - dr, c1 = column - dc, r2 = row + dr, c2 = column + dc;
             if (inBounds(r1,c1) && inBounds(r2,c2)
-                    && getCell(r1,c1) == sprint_3.Move.S && getCell(row,column) == sprint_3.Move.O && getCell(r2,c2) == sprint_3.Move.S) {
+                    && getCell(r1,c1) == Move.S && getCell(row,column) == Move.O && getCell(r2,c2) == Move.S) {
                 drawSegment(r1,c1,r2,c2);
             }
 
             int rC = row + dr, cC = column + dc, rE = row + 2*dr, cE = column + 2*dc;
             if (inBounds(rC,cC) && inBounds(rE,cE)
-                    && getCell(row,column) == sprint_3.Move.S && getCell(rC,cC) == sprint_3.Move.O && getCell(rE,cE) == sprint_3.Move.S) {
+                    && getCell(row,column) == Move.S && getCell(rC,cC) == Move.O && getCell(rE,cE) == Move.S) {
                 drawSegment(row,column,rE,cE);
             }
 
             int rB = row - 2*dr, cB = column - 2*dc, rM = row - dr, cM = column - dc;
             if (inBounds(rB,cB) && inBounds(rM,cM)
-                    && getCell(rB,cB) == sprint_3.Move.S && getCell(rM,cM) == sprint_3.Move.O && getCell(row,column) == sprint_3.Move.S) {
+                    && getCell(rB,cB) == Move.S && getCell(rM,cM) == Move.O && getCell(row,column) == Move.S) {
                 drawSegment(rB,cB,row,column);
             }
         }
@@ -241,8 +280,8 @@ public class Controller {
         line.setStrokeWidth(3.0);
 
         // color by current player who just played
-        sprint_3.Player.PlayerColor color = gameState.getCurrentPlayer().getColor();
-        line.setStroke(color == sprint_3.Player.PlayerColor.RED ? Color.RED : Color.BLUE);
+        Player.PlayerColor color = gameState.getCurrentPlayer().getColor();
+        line.setStroke(color == Player.PlayerColor.RED ? Color.RED : Color.BLUE);
 
         overlay.getChildren().add(line);
     }
@@ -250,9 +289,82 @@ public class Controller {
     private boolean inBounds(int r, int c) {
         return gameState.getBoard().isMoveInBounds(r, c);
     }
-    private sprint_3.Move getCell(int r, int c) {
+
+    private Move getCell(int r, int c) {
         return gameState.getBoard().getCell(r, c);
     }
 
+    private void triggerComputerTurnIfNeeded() {
+        if (gameState == null || gameState.isGameOver()) {
+            return;
+        }
 
+        Player currentPlayer = gameState.getCurrentPlayer();
+        if (currentPlayer instanceof ComputerPlayer computerPlayer) {
+            executeComputerMove(computerPlayer);
+        }
+        else {
+            enableAllButtons(true);
+        }
+    }
+
+    private void executeComputerMove(ComputerPlayer computerPlayer) {
+        enableAllButtons(false);
+        statusLabel.setText(computerPlayer.getName() + " is thinking...");
+
+        new Thread(() -> {
+            try {
+                Thread.sleep(300);
+
+                ComputerPlayer.AIMove aiMove = computerPlayer.AIChooseMoveFromState(gameState);
+
+                javafx.application.Platform.runLater(() -> {
+                    if (aiMove != null && gameState.tryMove(aiMove.row,  aiMove.column, aiMove.moveType)) {
+                        cellButtons[aiMove.row][aiMove.column].setText(
+                                aiMove.moveType == Move.S ? "S" : "O"
+                        );
+                        drawSegmentsFor(aiMove.row, aiMove.column);
+
+                        updateStatus();
+                        enableAllButtons(true);
+
+                        triggerComputerTurnIfNeeded();
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    private void enableAllButtons(boolean enableButtons) {
+        if (cellButtons == null) {
+            return;
+        }
+
+        for (Button[] row: cellButtons) {
+            for (Button button: row) {
+                if (button != null) {
+                    button.setDisable(!enableButtons);
+                }
+            }
+        }
+    }
+
+    private void updatePlayerControlsState() {
+        if (gameState == null) return;
+
+        Player redPlayer = gameState.redPlayer;
+        Player bluePlayer = gameState.bluePlayer;
+
+        // Disable/enable Red player's S/O buttons
+        boolean redIsHuman = redPlayer != null && redPlayer.isHuman();
+        redS.setDisable(!redIsHuman);
+        redO.setDisable(!redIsHuman);
+
+        // Disable/enable Blue player's S/O buttons
+        boolean blueIsHuman = bluePlayer != null && bluePlayer.isHuman();
+        blueS.setDisable(!blueIsHuman);
+        blueO.setDisable(!blueIsHuman);
+    }
 }

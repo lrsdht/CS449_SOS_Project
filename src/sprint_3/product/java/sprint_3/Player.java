@@ -1,6 +1,8 @@
 package sprint_3;
 
 
+import sprint_3.Board;
+
 abstract class Player {
     enum PlayerColor { BLUE, RED}
 
@@ -21,11 +23,11 @@ abstract class Player {
         return name;
     }
 
-    public abstract Move chooseMove(Board board);
+    public abstract sprint_3.Move chooseMove(sprint_3.Board board);
 
 }
 
-class HumanPlayer extends Player {
+class HumanPlayer extends sprint_3.Player {
 
     //constructor
     HumanPlayer(PlayerColor color, String name) {
@@ -33,7 +35,7 @@ class HumanPlayer extends Player {
     }
 
     @Override
-    public Move chooseMove(Board board) {
+    public sprint_3.Move chooseMove(Board board) {
         throw new UnsupportedOperationException(
                 "GUI Error"
         );

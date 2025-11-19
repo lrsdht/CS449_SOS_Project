@@ -38,8 +38,15 @@
                 <Font name="System Bold" size="14.0" />
             </font>
         </Text>
-        <RadioButton layoutX="40.0" layoutY="120.0" mnemonicParsing="false" selected="true" text="Human" />
-        <RadioButton layoutX="40.0" layoutY="145.0" mnemonicParsing="false" text="Computer" />
+        <RadioButton fx:id="blueHuman" layoutX="40.0" layoutY="120.0" mnemonicParsing="false" selected="true" text="Human">
+            <toggleGroup>
+                <ToggleGroup fx:id="bluePlayerTypeGroup" />
+            </toggleGroup>
+        </RadioButton>
+        <RadioButton fx:id="blueComputer" layoutX="40.0" layoutY="145.0" mnemonicParsing="false" text="Computer" toggleGroup="$bluePlayerTypeGroup" />
+        <!-- ADDED difficulty selector for Blue -->
+        <ComboBox fx:id="blueDifficulty" layoutX="30.0" layoutY="230.0" prefWidth="100.0" promptText="Difficulty" visible="false" />
+
         <RadioButton fx:id="blueS" layoutX="60.0" layoutY="180.0" mnemonicParsing="false" text="S">
             <toggleGroup>
                 <ToggleGroup fx:id="blueGroup" />
@@ -52,8 +59,15 @@
                 <Font name="System Bold" size="14.0" />
             </font>
         </Text>
-        <RadioButton layoutX="520.0" layoutY="120.0" mnemonicParsing="false" selected="true" text="Human" />
-        <RadioButton layoutX="520.0" layoutY="145.0" mnemonicParsing="false" text="Computer" />
+        <RadioButton fx:id="redHuman" layoutX="520.0" layoutY="120.0" mnemonicParsing="false" selected="true" text="Human">
+            <toggleGroup>
+                <ToggleGroup fx:id="redPlayerTypeGroup" />
+            </toggleGroup>
+        </RadioButton>
+        <RadioButton fx:id="redComputer" layoutX="520.0" layoutY="145.0" mnemonicParsing="false" text="Computer" toggleGroup="$redPlayerTypeGroup" />
+        <!-- ADDED difficulty selector for Red -->
+        <ComboBox fx:id="redDifficulty" layoutX="520.0" layoutY="230.0" prefWidth="100.0" promptText="Difficulty" visible="false" />
+
         <RadioButton fx:id="redS" layoutX="540.0" layoutY="180.0" mnemonicParsing="false" text="S">
             <toggleGroup>
                 <ToggleGroup fx:id="redGroup" />
@@ -62,8 +76,6 @@
         <RadioButton fx:id="redO" layoutX="540.0" layoutY="205.0" mnemonicParsing="false" text="O" toggleGroup="$redGroup" />
 
         <Label fx:id="statusLabel" alignment="CENTER" layoutX="50.0" layoutY="383.0" maxWidth="Infinity" prefWidth="450.0" textAlignment="CENTER" wrapText="true" />
-
-
 
         <CheckBox layoutX="30.0" layoutY="410.0" mnemonicParsing="false" text="Record Game" />
         <Button layoutX="533.0" layoutY="406.0" mnemonicParsing="false" text="Replay" />

@@ -1,14 +1,12 @@
-package sprint_3;
-
-import sprint_3.Board;
+package Sprint_4;
 
 public class GameState {
     enum Mode { SIMPLE, GENERAL }
 
-    sprint_3.Board board;
-    sprint_3.Player redPlayer;
-    sprint_3.Player bluePlayer;
-    sprint_3.Player current;
+    Board board;
+    Player redPlayer;
+    Player bluePlayer;
+    Player current;
     Mode mode;
 
     int redScore;
@@ -19,8 +17,8 @@ public class GameState {
     // constructor
     GameState() {};
 
-    public void startNewGame(int boardSize, Mode mode, sprint_3.Player redPlayer, sprint_3.Player bluePlayer) {
-        board = new sprint_3.Board(boardSize);
+    public void startNewGame(int boardSize, Mode mode, Player redPlayer, Player bluePlayer) {
+        board = new Board(boardSize);
         this.redPlayer = redPlayer;
         this.bluePlayer = bluePlayer;
         this.mode = mode;
@@ -34,7 +32,7 @@ public class GameState {
         return board;
     }
 
-    public sprint_3.Player getCurrentPlayer() {
+    public Player getCurrentPlayer() {
         return current;
     }
 
@@ -50,7 +48,7 @@ public class GameState {
         return mode;
     }
 
-    public boolean tryMove(int row, int column, sprint_3.Move move) {
+    public boolean tryMove(int row, int column, Move move) {
 
         if (gameOver) {
             return false;
@@ -64,7 +62,7 @@ public class GameState {
 
         if (mode == Mode.SIMPLE) {
             if (updateScores > 0) {
-                if (current.getColor() == sprint_3.Player.PlayerColor.RED) {
+                if (current.getColor() == Player.PlayerColor.RED) {
                     redScore += updateScores;
                 } else {
                     blueScore += updateScores;
@@ -79,7 +77,7 @@ public class GameState {
             switchTurn();
             return true;
         } else if (mode == Mode.GENERAL) {
-            if (current.getColor() == sprint_3.Player.PlayerColor.RED) {
+            if (current.getColor() == Player.PlayerColor.RED) {
                 redScore += updateScores;
             } else {
                 blueScore += updateScores;
@@ -113,7 +111,7 @@ public class GameState {
         return gameOver;
     }
 
-    public sprint_3.Player getWinner() {
+    public Player getWinner() {
         if (!gameOver) {
             return null;
         }
@@ -132,7 +130,7 @@ public class GameState {
             return "Game in progress";
         }
 
-        sprint_3.Player winner = getWinner();
+        Player winner = getWinner();
         if (winner == null) {
             return "Game Over - It's a Draw Red: " + redScore + " Blue: " + blueScore;
         } else {
